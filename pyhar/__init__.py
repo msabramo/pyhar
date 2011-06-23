@@ -27,6 +27,6 @@ def load(fp, encoding=None, cls=HARDecoder, **kwds):
     return loads(fp.read(), encoding=encoding, cls=cls, **kwds)
 
 def loads(s, encoding=None, cls=HARDecoder, **kwds):
-    obj = json.loads(s, self.encoding)
+    obj = json.loads(s, encoding)
     
     return cls(encoding=encoding, **kwds).decode(obj)

@@ -2,7 +2,7 @@
 import re
 from datetime import datetime, timedelta
     
-from session import WebSession, WebSessionCreator, WebSessionBrowser
+from session import WebEntry, WebPage, WebSession, WebSessionCreator, WebSessionBrowser
 
 class HARDecodeError(ValueError):
     def __init__(self, msg):
@@ -24,24 +24,21 @@ class HARDecoder(object):
     def _decodeWebObject(self, obj, cls, optional=True):
         self._assertProperty(obj, ['name', 'version'])
             
-        o = cls()
-        o.name = obj['name']
-        o.version = obj['version']
-        o.comment = obj['comment']
-        
-        return o
+        return cls(obj['name'], obj['version'], obj.get('comment'))
     
     def _decodeWebPage(self, obj):
-        self._assertProperty(obj, ['startedDateTime', 'id', 'title', 'pageTimings'])
+        self._assertProperty(obj, ['startedDateTime', 'id', 'title'])
         
         page = WebPage(obj['id'], self._decodeDatetime(obj['startedDateTime']))
         page.title = obj['title']
-        page.comment = obj['comment']
+        page.comment = obj.get('comment')
                 
         return page
     
     def _decodeWebEntry(self, obj):
-        pass
+        self._assertProperty(obj, ['pageref', 'time', 'startedDateTime'])
+        
+        return WebEntry(obj['pageref'], obj['time'], obj['startedDateTime'], obj['request']['url'])
     
     def _decodeDatetime(self, s):
         m = self.RE_DATETIME.match(s)
@@ -75,7 +72,7 @@ class HARDecoder(object):
             session.pages = dict([(page.id, page) for page in pages])
             
         entries = [self._decodeWebEntry(entry) for entry in log['entries']]
-        session.entries = dict([(entry.pageref, entry) for entry in entries])
+        session.entries = dict([(entry.url, entry) for entry in entries])
         
         session.comment = log.get('comment')
         

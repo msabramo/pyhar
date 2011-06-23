@@ -20,6 +20,13 @@ class WebPage(object):
         self.title = None
         self.comment = None
 
+class WebEntry(object):
+    def __init__(self, pageref, time, startedDateTime, url):
+        self.pageref = pageref
+        self.time = time
+        self.startedDateTime = startedDateTime
+        self.url = url
+
 class WebSession(object):
     def __init__(self):
         self.creator = None
